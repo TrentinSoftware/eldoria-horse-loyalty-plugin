@@ -1,0 +1,49 @@
+# Tempo e distância para ganhar XP montado
+riding-xp-per-second: 1
+riding-xp-per-block: 10
+
+# XP por alimentação
+feeding:
+  apple: 1
+  golden_apple: 20
+  enchanted_golden_apple: 200
+
+# XP necessário para cada nível (índice 0 = nível 1)
+level-xp-requirements:
+  - 20
+  - 40
+  - 60
+  - 80
+  - 100
+  - 120
+  - 140
+  - 160
+  - 180
+  - 200
+
+# Efeitos de level-up
+level-up-sound: ENTITY_PLAYER_LEVELUP
+level-up-message: "&bSeu cavalo subiu para o nível &l%level%&b!"
+
+# Nome automático ao atingir determinado nível
+auto-name:
+  enabled: true
+  level: 3
+  name: "&eCavalo Leal"
+
+# Comandos usados pelos botões do catálogo
+call-command: "callhorse"
+favorite-command: "favoritehorse"
+rename-command: "horselealdade rename"   # comando base para renomear (o UUID será anexado)
+
+# Mensagens de ajuda
+help-messages:
+  - "&a/horselealdade get &7- Mostra lealdade e XP do cavalo"
+  - "&a/horselealdade set <nível> &7- Define a lealdade (admin)"
+  - "&a/horselealdade item &7- Obtém uma ficha de cavalo"
+  - "&a/horselealdade rename <UUID> &7- Renomeia um cavalo (use após clicar no botão do catálogo)"
+  - "&a/horsecatalog &7- Obtém o livro de catálogo"
+  - "&a/callhorse <UUID> &7- Chama um cavalo (nível 8+)"
+  - "&a/favoritehorse <UUID> &7- Favorita um cavalo (nível 10)"
+  - "&a/vemcapocoto &7- Chama o cavalo favorito"
+  - "&a/horselealdade help &7- Mostra esta ajuda"
