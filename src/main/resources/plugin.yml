@@ -1,0 +1,11 @@
+name: HorseLoyalty
+version: '${version}'
+main: org.horse_loyalty.HorseLoyaltyPlugin
+api-version: '1.21'
+author: SeuNome
+description: Sistema de lealdade para cavalos.
+commands:
+  horselealdade:
+    description: Gerencia a lealdade de um cavalo
+    usage: /horselealdade <get|set> <nivel>
+    permission: horselealdade.admin
