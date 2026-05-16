@@ -19,7 +19,9 @@ public final class HorseLoyaltyPlugin extends JavaPlugin {
         this.favoriteKey = new NamespacedKey(this, "favorite_horse");
 
         // Comandos
-        Objects.requireNonNull(getCommand("horselealdade")).setExecutor(new HorseLealdadeCommand(this, loyaltyManager));
+        HorseLealdadeCommand horseLealdadeCmd = new HorseLealdadeCommand(this, loyaltyManager);
+        Objects.requireNonNull(getCommand("horselealdade")).setExecutor(horseLealdadeCmd);
+        Objects.requireNonNull(getCommand("horselealdade")).setTabCompleter(horseLealdadeCmd);
         Objects.requireNonNull(getCommand("horsecatalog")).setExecutor(new HorseCatalogCommand(catalogKey));
         Objects.requireNonNull(getCommand("callhorse")).setExecutor(new CallHorseCommand(loyaltyManager));
         Objects.requireNonNull(getCommand("favoritehorse")).setExecutor(new FavoriteHorseCommand(loyaltyManager, favoriteKey));
@@ -29,7 +31,7 @@ public final class HorseLoyaltyPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new HorseProtectListener(loyaltyManager), this);
         getServer().getPluginManager().registerEvents(new HorseRidingListener(this, loyaltyManager), this);
         getServer().getPluginManager().registerEvents(new HorseFeedListener(this, loyaltyManager), this);
-        getServer().getPluginManager().registerEvents(new HorseInfoListener(this, loyaltyManager), this);
+        getServer().getPluginManager().registerEvents(new HorseInfoListener(this, loyaltyManager, catalogKey), this);
         getServer().getPluginManager().registerEvents(new HorseCatalogListener(this, loyaltyManager, catalogKey), this);
         getServer().getPluginManager().registerEvents(new RenameChatListener(this), this);
 

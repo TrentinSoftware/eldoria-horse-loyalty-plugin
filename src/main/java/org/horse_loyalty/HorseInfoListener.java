@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -19,10 +20,12 @@ public class HorseInfoListener implements Listener {
 
     private final LoyaltyManager manager;
     private final HorseLoyaltyPlugin plugin;
+    private final NamespacedKey catalogKey;
 
-    public HorseInfoListener(HorseLoyaltyPlugin plugin, LoyaltyManager manager) {
+    public HorseInfoListener(HorseLoyaltyPlugin plugin, LoyaltyManager manager, NamespacedKey catalogKey) {
         this.plugin = plugin;
         this.manager = manager;
+        this.catalogKey = catalogKey;
     }
 
     // Shift + left click (dano)
@@ -47,8 +50,24 @@ public class HorseInfoListener implements Listener {
         if (!meta.getPersistentDataContainer().has(key, PersistentDataType.BYTE)) return;
         if (!(event.getRightClicked() instanceof Horse horse)) return;
 
-        event.setCancelled(true); // bloqueia interação normal (montar etc)
+        event.setCancelled(true);
         showHorseInfo(player, horse);
+    }
+
+    // Shift + clique direito com o livro de catálogo em um cavalo → abre/atualiza catálogo
+    @EventHandler
+    public void onCatalogBookClick(PlayerInteractEntityEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
+        Player player = event.getPlayer();
+        if (!player.isSneaking()) return;
+        if (!(event.getRightClicked() instanceof Horse)) return;
+        ItemStack item = player.getInventory().getItemInMainHand();
+        if (item == null || item.getType() != Material.WRITTEN_BOOK) return;
+        BookMeta meta = (BookMeta) item.getItemMeta();
+        if (meta == null || !meta.getPersistentDataContainer().has(catalogKey, PersistentDataType.BYTE)) return;
+
+        event.setCancelled(true);
+        HorseCatalogListener.refreshAndOpenBook(player, item, plugin, manager, catalogKey);
     }
 
     private void showHorseInfo(Player player, Horse horse) {
@@ -60,8 +79,9 @@ public class HorseInfoListener implements Listener {
         int level = manager.getLoyalty(horse);
         int xp = manager.getXP(horse);
         int nextLevel = level + 1;
+        int maxLevel = manager.getMaxLevel();
         String reqText;
-        if (nextLevel > 10) {
+        if (nextLevel > maxLevel) {
             reqText = "MAX";
         } else {
             int required = plugin.getConfig().getIntegerList("level-xp-requirements").get(nextLevel - 1);
@@ -69,7 +89,7 @@ public class HorseInfoListener implements Listener {
         }
 
         player.sendMessage(Component.text("=== Cavalo Leal ===", NamedTextColor.GOLD));
-        player.sendMessage(Component.text("Nível: " + level + "/10", NamedTextColor.AQUA));
+        player.sendMessage(Component.text("Nível: " + level + "/" + maxLevel, NamedTextColor.AQUA));
         player.sendMessage(Component.text("XP: " + reqText, NamedTextColor.YELLOW));
     }
 }

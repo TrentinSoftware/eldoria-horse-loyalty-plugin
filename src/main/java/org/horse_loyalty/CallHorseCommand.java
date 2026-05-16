@@ -45,8 +45,8 @@ public class CallHorseCommand implements CommandExecutor {
             player.sendMessage("§cVocê não é o dono deste cavalo.");
             return true;
         }
-        if (manager.getLoyalty(horse) < 8) {
-            player.sendMessage("§cEste cavalo precisa de lealdade 8 ou superior para ser chamado.");
+        if (manager.getLoyalty(horse) < manager.getCallLevel()) {
+            player.sendMessage("§cEste cavalo precisa de lealdade " + manager.getCallLevel() + " ou superior para ser chamado.");
             return true;
         }
         horse.teleport(player.getLocation());

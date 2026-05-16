@@ -41,25 +41,40 @@ public class HorseCatalogListener implements Listener {
         BookMeta meta = (BookMeta) item.getItemMeta();
         if (meta == null || !meta.getPersistentDataContainer().has(catalogKey, PersistentDataType.BYTE)) return;
 
-        Player player = event.getPlayer();
-        List<Horse> horses = getPlayersHorses(player);
+        event.setCancelled(true);
+        refreshAndOpenBook(event.getPlayer(), item, plugin, manager, catalogKey);
+    }
+
+    /**
+     * Atualiza as páginas do livro de catálogo e o abre para o jogador.
+     * Pode ser chamado de outros listeners (ex: shift+clique no cavalo).
+     */
+    public static void refreshAndOpenBook(Player player, ItemStack book, HorseLoyaltyPlugin plugin,
+                                          LoyaltyManager manager, NamespacedKey catalogKey) {
+        BookMeta meta = (BookMeta) book.getItemMeta();
+        if (meta == null) return;
+
+        List<Horse> horses = getPlayersHorsesStatic(player, plugin);
         List<Component> pages = new ArrayList<>();
 
         if (horses.isEmpty()) {
             pages.add(Component.text("Você não possui cavalos domesticados."));
         } else {
             for (int i = 0; i < horses.size(); i++) {
-                pages.add(buildHorsePage(horses.get(i), i+1));
+                pages.add(buildHorsePageStatic(horses.get(i), i + 1, plugin, manager));
             }
         }
 
         meta.pages(pages);
-        item.setItemMeta(meta);
-        player.openBook(item);
-        event.setCancelled(true);
+        book.setItemMeta(meta);
+        player.openBook(book);
     }
 
     private Component buildHorsePage(Horse horse, int index) {
+        return buildHorsePageStatic(horse, index, plugin, manager);
+    }
+
+    private static Component buildHorsePageStatic(Horse horse, int index, HorseLoyaltyPlugin plugin, LoyaltyManager manager) {
         String name = horse.getCustomName() != null ? horse.getCustomName() : "Cavalo #" + index;
         int level = manager.getLoyalty(horse);
         int xp = manager.getXP(horse);
@@ -76,10 +91,10 @@ public class HorseCatalogListener implements Listener {
                 .append(Component.text(ownerName, NamedTextColor.WHITE))
                 .append(Component.newline())
                 .append(Component.text("Lealdade: ", NamedTextColor.GRAY))
-                .append(Component.text(level + "/10", NamedTextColor.AQUA))
+                .append(Component.text(level + "/" + manager.getMaxLevel(), NamedTextColor.AQUA))
                 .append(Component.newline())
                 .append(Component.text("XP: ", NamedTextColor.GRAY))
-                .append(Component.text(xp + "/" + getRequiredForNext(level), NamedTextColor.YELLOW))
+                .append(Component.text(xp + "/" + getRequiredForNextStatic(level, plugin), NamedTextColor.YELLOW))
                 .append(Component.newline())
                 .append(Component.text("Velocidade: ", NamedTextColor.GRAY))
                 .append(Component.text(String.format("%.3f", speed), NamedTextColor.GREEN))
@@ -98,8 +113,8 @@ public class HorseCatalogListener implements Listener {
                 .hoverEvent(Component.text("Clique para renomear este cavalo")));
         page = page.append(Component.newline());
 
-        // Botão de chamar (nível >= 8)
-        if (level >= 8) {
+        // Botão de chamar (nível >= call-level)
+        if (level >= manager.getCallLevel()) {
             String callCmd = plugin.getConfig().getString("call-command") + " " + uuid;
             page = page.append(Component.text("[Chamar]", NamedTextColor.GREEN)
                     .clickEvent(ClickEvent.runCommand("/" + callCmd))
@@ -107,8 +122,8 @@ public class HorseCatalogListener implements Listener {
             page = page.append(Component.newline());
         }
 
-        // Botão de favoritar (nível >= 10)
-        if (level >= 10) {
+        // Botão de favoritar (nível >= favorite-level)
+        if (level >= manager.getFavoriteLevel()) {
             String favCmd = plugin.getConfig().getString("favorite-command") + " " + uuid;
             page = page.append(Component.text("[Favoritar]", NamedTextColor.LIGHT_PURPLE)
                     .clickEvent(ClickEvent.runCommand("/" + favCmd))
@@ -119,12 +134,20 @@ public class HorseCatalogListener implements Listener {
     }
 
     private int getRequiredForNext(int currentLevel) {
+        return getRequiredForNextStatic(currentLevel, plugin);
+    }
+
+    private static int getRequiredForNextStatic(int currentLevel, HorseLoyaltyPlugin plugin) {
         var list = plugin.getConfig().getIntegerList("level-xp-requirements");
         if (currentLevel + 1 > list.size()) return 0;
         return list.get(currentLevel); // índice 0 = lvl 1
     }
 
     private List<Horse> getPlayersHorses(Player player) {
+        return getPlayersHorsesStatic(player, plugin);
+    }
+
+    private static List<Horse> getPlayersHorsesStatic(Player player, HorseLoyaltyPlugin plugin) {
         List<Horse> result = new ArrayList<>();
         for (World world : plugin.getServer().getWorlds()) {
             for (Entity entity : world.getEntities()) {

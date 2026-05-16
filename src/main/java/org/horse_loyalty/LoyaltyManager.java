@@ -29,7 +29,7 @@ public class LoyaltyManager {
     }
 
     public void setLoyalty(Horse horse, int level) {
-        level = Math.max(0, Math.min(10, level));
+        level = Math.max(0, Math.min(getMaxLevel(), level));
         horse.getPersistentDataContainer().set(loyaltyKey, PersistentDataType.INTEGER, level);
         applySpeed(horse);
     }
@@ -51,14 +51,15 @@ public class LoyaltyManager {
         int currentXP = getXP(horse);
         int newXP = currentXP + amount;
         int currentLevel = getLoyalty(horse);
+        int maxLevel = getMaxLevel();
         int nextLevel = currentLevel + 1;
-        if (nextLevel > 10) {
+        if (nextLevel > maxLevel) {
             setXP(horse, 0);
             return;
         }
 
         int requiredXP = getRequiredXPForLevel(nextLevel);
-        while (newXP >= requiredXP && currentLevel < 10) {
+        while (newXP >= requiredXP && currentLevel < maxLevel) {
             newXP -= requiredXP;
             currentLevel++;
             setLoyalty(horse, currentLevel);
@@ -78,7 +79,7 @@ public class LoyaltyManager {
                     horse.setCustomNameVisible(true);
                 }
             }
-            if (currentLevel >= 10) {
+            if (currentLevel >= maxLevel) {
                 newXP = 0;
                 break;
             }
@@ -109,5 +110,22 @@ public class LoyaltyManager {
     // ---------- PROPRIEDADE ----------
     public boolean isOwner(Player player, Horse horse) {
         return horse.isTamed() && horse.getOwner() != null && horse.getOwner().getUniqueId().equals(player.getUniqueId());
+    }
+
+    // ---------- CONFIGURAÇÕES DINÂMICAS ----------
+    public int getMaxLevel() {
+        return plugin.getConfig().getInt("max-level", 10);
+    }
+
+    public int getExclusiveMountLevel() {
+        return plugin.getConfig().getInt("exclusive-mount-level", 5);
+    }
+
+    public int getCallLevel() {
+        return plugin.getConfig().getInt("call-level", 8);
+    }
+
+    public int getFavoriteLevel() {
+        return plugin.getConfig().getInt("favorite-level", 10);
     }
 }

@@ -49,8 +49,8 @@ public class FavoriteHorseCommand implements CommandExecutor {
             player.sendMessage("§cVocê não é o dono deste cavalo.");
             return true;
         }
-        if (manager.getLoyalty(horse) < 10) {
-            player.sendMessage("§cEste cavalo precisa de lealdade 10 para ser favoritado.");
+        if (manager.getLoyalty(horse) < manager.getFavoriteLevel()) {
+            player.sendMessage("§cEste cavalo precisa de lealdade " + manager.getFavoriteLevel() + " para ser favoritado.");
             return true;
         }
 

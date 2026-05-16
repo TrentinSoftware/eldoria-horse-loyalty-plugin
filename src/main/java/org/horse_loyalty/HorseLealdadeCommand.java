@@ -6,6 +6,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +15,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
-public class HorseLealdadeCommand implements CommandExecutor {
+public class HorseLealdadeCommand implements CommandExecutor, TabCompleter {
 
     private final LoyaltyManager manager;
     private final HorseLoyaltyPlugin plugin;
@@ -43,6 +44,12 @@ public class HorseLealdadeCommand implements CommandExecutor {
             case "help":
                 sendHelp(player);
                 return true;
+            case "config": {
+                // Passa os args a partir de args[1]
+                String[] configArgs = Arrays.copyOfRange(args, 1, args.length);
+                ConfigCommand.handle(plugin, player, configArgs);
+                return true;
+            }
             case "item":
                 ItemStack paper = new ItemStack(Material.PAPER);
                 ItemMeta meta = paper.getItemMeta();
@@ -101,15 +108,16 @@ public class HorseLealdadeCommand implements CommandExecutor {
             int level = manager.getLoyalty(horse);
             int xp = manager.getXP(horse);
             int nextLevel = level + 1;
+            int maxLevel = manager.getMaxLevel();
             String reqText;
-            if (nextLevel > 10) {
+            if (nextLevel > maxLevel) {
                 reqText = "MAX";
             } else {
                 int required = plugin.getConfig().getIntegerList("level-xp-requirements").get(nextLevel - 1);
                 reqText = xp + "/" + required;
             }
             player.sendMessage("§a=== Cavalo Leal ===");
-            player.sendMessage("§bNível: " + level + "/10");
+            player.sendMessage("§bNível: " + level + "/" + maxLevel);
             player.sendMessage("§eXP: " + reqText);
             return true;
         }
@@ -132,6 +140,21 @@ public class HorseLealdadeCommand implements CommandExecutor {
 
         sendHelp(player);
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+        List<String> subcommands = Arrays.asList("get", "set", "item", "rename", "help", "config");
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase();
+            return subcommands.stream().filter(s -> s.startsWith(prefix)).toList();
+        }
+        if (args.length >= 2 && args[0].equalsIgnoreCase("config")) {
+            // Delegate to ConfigCommand tab-completion
+            String[] configArgs = Arrays.copyOfRange(args, 1, args.length);
+            return ConfigCommand.tabComplete(configArgs);
+        }
+        return List.of();
     }
 
     private void sendHelp(Player player) {

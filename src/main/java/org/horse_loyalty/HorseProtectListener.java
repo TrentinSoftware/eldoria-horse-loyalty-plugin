@@ -22,8 +22,8 @@ public class HorseProtectListener implements Listener {
         if (!(event.getRightClicked() instanceof Horse horse)) return;
         Player player = event.getPlayer();
 
-        // Impede montar se lealdade >= 5 e jogador não é dono
-        if (manager.getLoyalty(horse) >= 5 && !isOwner(player, horse)) {
+        // Impede montar se lealdade >= exclusive-mount-level e jogador não é dono
+        if (manager.getLoyalty(horse) >= manager.getExclusiveMountLevel() && !isOwner(player, horse)) {
             event.setCancelled(true);
             player.sendMessage("§cEste cavalo é leal apenas ao seu dono.");
         }
@@ -34,7 +34,7 @@ public class HorseProtectListener implements Listener {
         if (!(event.getEntity() instanceof Player player)) return;
         if (!(event.getMount() instanceof Horse horse)) return;
 
-        if (manager.getLoyalty(horse) >= 5 && !isOwner(player, horse)) {
+        if (manager.getLoyalty(horse) >= manager.getExclusiveMountLevel() && !isOwner(player, horse)) {
             event.setCancelled(true);
             player.sendMessage("§cEste cavalo não permite que você monte.");
         }

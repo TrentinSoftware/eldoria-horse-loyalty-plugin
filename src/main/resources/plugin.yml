@@ -7,7 +7,7 @@ description: Sistema de lealdade para cavalos.
 commands:
   horselealdade:
     description: Gerencia a lealdade de um cavalo
-    usage: /horselealdade <get|set|item> [nivel]
+    usage: /horselealdade <get|set|item|rename|config|help>
     permission: horselealdade.admin
   horsecatalog:
     description: Obtém o catálogo de cavalos
