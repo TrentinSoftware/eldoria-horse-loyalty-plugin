@@ -102,9 +102,14 @@ public class LoyaltyManager {
             horse.getPersistentDataContainer().set(originalSpeedKey, PersistentDataType.DOUBLE, current);
         }
         double original = horse.getPersistentDataContainer().get(originalSpeedKey, PersistentDataType.DOUBLE);
-        int loyalty = getLoyalty(horse);
-        double extra = loyalty * 0.1;
-        horse.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(original + extra);
+        if (plugin.getConfig().getBoolean("speed-bonus.enabled", true)) {
+            double perLevel = plugin.getConfig().getDouble("speed-bonus.per-level", 0.1);
+            int loyalty = getLoyalty(horse);
+            double extra = loyalty * perLevel;
+            horse.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(original + extra);
+        } else {
+            horse.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(original);
+        }
     }
 
     // ---------- PROPRIEDADE ----------

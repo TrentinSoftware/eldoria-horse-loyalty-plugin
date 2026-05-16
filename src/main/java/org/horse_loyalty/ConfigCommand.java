@@ -38,7 +38,13 @@ public class ConfigCommand {
     // Boolean keys that can be get/set with true/false
     static final Set<String> BOOL_KEYS = Set.of(
             "call-cooldown.enabled",
-            "call-range.enabled"
+            "call-range.enabled",
+            "speed-bonus.enabled"
+    );
+
+    // Double (decimal) keys that can be get/set
+    static final Set<String> DOUBLE_KEYS = Set.of(
+            "speed-bonus.per-level"
     );
 
     // List keys that support add/remove
@@ -52,6 +58,7 @@ public class ConfigCommand {
         ALL_KEYS = new ArrayList<>();
         ALL_KEYS.addAll(INT_KEYS);
         ALL_KEYS.addAll(BOOL_KEYS);
+        ALL_KEYS.addAll(DOUBLE_KEYS);
         ALL_KEYS.addAll(LIST_KEYS);
         ALL_KEYS.sort(String::compareTo);
     }
@@ -108,7 +115,7 @@ public class ConfigCommand {
     }
 
     private static void handleGet(Player player, FileConfiguration config, String key) {
-        if (!INT_KEYS.contains(key) && !BOOL_KEYS.contains(key) && !LIST_KEYS.contains(key)) {
+        if (!INT_KEYS.contains(key) && !BOOL_KEYS.contains(key) && !DOUBLE_KEYS.contains(key) && !LIST_KEYS.contains(key)) {
             player.sendMessage("§cChave desconhecida: §e" + key);
             player.sendMessage("§7Chaves válidas: " + String.join(", ", ALL_KEYS));
             return;
@@ -119,6 +126,9 @@ public class ConfigCommand {
             player.sendMessage("§6" + key + "§7: " + list);
         } else if (BOOL_KEYS.contains(key)) {
             boolean value = config.getBoolean(key);
+            player.sendMessage("§6" + key + "§7 = §e" + value);
+        } else if (DOUBLE_KEYS.contains(key)) {
+            double value = config.getDouble(key);
             player.sendMessage("§6" + key + "§7 = §e" + value);
         } else {
             int value = config.getInt(key, -1);
@@ -134,6 +144,24 @@ public class ConfigCommand {
                 return;
             }
             boolean value = Boolean.parseBoolean(rawValue);
+            config.set(key, value);
+            plugin.saveConfig();
+            player.sendMessage("§a" + key + " §7definido para §e" + value + "§7.");
+            return;
+        }
+
+        if (DOUBLE_KEYS.contains(key)) {
+            double value;
+            try {
+                value = Double.parseDouble(rawValue);
+            } catch (NumberFormatException e) {
+                player.sendMessage("§cValor inválido. Use um número decimal (ex: 0.1).");
+                return;
+            }
+            if (value < 0) {
+                player.sendMessage("§cO valor não pode ser negativo.");
+                return;
+            }
             config.set(key, value);
             plugin.saveConfig();
             player.sendMessage("§a" + key + " §7definido para §e" + value + "§7.");
@@ -250,6 +278,7 @@ public class ConfigCommand {
                 List<String> writable = new ArrayList<>();
                 writable.addAll(INT_KEYS);
                 writable.addAll(BOOL_KEYS);
+                writable.addAll(DOUBLE_KEYS);
                 return filterPrefix(writable, args[1]);
             }
             if (action.equals("add") || action.equals("remove")) {

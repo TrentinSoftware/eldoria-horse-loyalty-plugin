@@ -25,6 +25,11 @@ level-xp-requirements:
 level-up-sound: ENTITY_PLAYER_LEVELUP
 level-up-message: "&bSeu cavalo subiu para o nível &l%level%&b!"
 
+# Bônus de velocidade por nível de lealdade
+speed-bonus:
+  enabled: true
+  per-level: 0.1
+
 # Nome automático ao atingir determinado nível
 auto-name:
   enabled: true
