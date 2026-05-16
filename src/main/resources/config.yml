@@ -34,7 +34,7 @@ auto-name:
 # Comandos usados pelos botões do catálogo
 call-command: "callhorse"
 favorite-command: "favoritehorse"
-rename-command: "horselealdade rename"   # comando base para renomear (o UUID será anexado)
+rename-command: "lealdadecavalo rename"   # comando base para renomear (o UUID será anexado)
 
 # Níveis de habilidade (configuráveis por /horselealdade config set)
 max-level: 10
@@ -42,15 +42,40 @@ exclusive-mount-level: 5
 call-level: 8
 favorite-level: 10
 
-# Mensagens de ajuda
-help-messages:
-  - "&a/horselealdade get &7- Mostra lealdade e XP do cavalo"
-  - "&a/horselealdade set <nível> &7- Define a lealdade (admin)"
-  - "&a/horselealdade item &7- Obtém uma ficha de cavalo"
-  - "&a/horselealdade rename <UUID> &7- Renomeia um cavalo (use após clicar no botão do catálogo)"
-  - "&a/horselealdade config <get|set|add|remove> <chave> [valor] &7- Altera configurações (admin)"
+# Mensagens de ajuda para jogadores comuns
+help-player:
+  - "&a/lealdadecavalo get &7- Mostra lealdade e XP do cavalo"
+  - "&a/lealdadecavalo item &7- Obtém uma ficha de cavalo"
+  - "&a/lealdadecavalo rename <UUID> &7- Renomeia um cavalo (clique no botão do catálogo)"
+  - "&a/lealdadecavalo help &7- Mostra esta ajuda"
   - "&a/horsecatalog &7- Obtém o livro de catálogo"
-  - "&a/callhorse <UUID> &7- Chama um cavalo (nível call-level+)"
-  - "&a/favoritehorse <UUID> &7- Favorita um cavalo (nível favorite-level)"
+  - "&a/callhorse <UUID> &7- Chama um cavalo (nível 8+)"
+  - "&a/favoritehorse <UUID> &7- Favorita um cavalo (nível 10)"
   - "&a/vemcapocoto &7- Chama o cavalo favorito"
-  - "&a/horselealdade help &7- Mostra esta ajuda"
+
+# Mensagens de ajuda para administradores (apenas com permissão lealdadecavalo.admin)
+help-admin:
+  - "&c/lealdadecavalo set <nível> &7- Define a lealdade (admin)"
+  - "&c/lealdadecavalo config <get|set|add|remove> <chave> [valor] &7- Configura o plugin (admin)"
+
+# Passageiro duplo removido.
+
+# Cooldown para chamar o cavalo
+call-cooldown:
+  enabled: false
+  base-seconds: 10
+
+# Alcance máximo para chamar o cavalo (por nível de lealdade)
+call-range:
+  enabled: true
+  range-per-level:
+    - 50
+    - 60
+    - 70
+    - 80
+    - 100
+    - 120
+    - 140
+    - 160
+    - 180
+    - 200

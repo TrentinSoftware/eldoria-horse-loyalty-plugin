@@ -5,32 +5,38 @@ api-version: '1.21'
 author: SeuNome
 description: Sistema de lealdade para cavalos.
 commands:
-  horselealdade:
+  lealdadecavalo:
     description: Gerencia a lealdade de um cavalo
-    usage: /horselealdade <get|set|item|rename|config|help>
-    permission: horselealdade.admin
+    usage: /lealdadecavalo <get|set|item|rename|help|config>
   horsecatalog:
     description: Obtém o catálogo de cavalos
     usage: /horsecatalog
-    permission: horselealdade.catalog
+    permission: lealdadecavalo.catalog
   callhorse:
     description: Chama um cavalo específico (nível 8+)
     usage: /callhorse <UUID>
-    permission: horselealdade.call
+    permission: lealdadecavalo.call
   favoritehorse:
     description: Favorita um cavalo (nível 10)
     usage: /favoritehorse <UUID>
-    permission: horselealdade.favorite
+    permission: lealdadecavalo.favorite
   vemcapocoto:
     description: Chama o cavalo favorito
     usage: /vemcapocoto
-    permission: horselealdade.favorite
+    permission: lealdadecavalo.favorite
 permissions:
-  horselealdade.admin:
+  lealdadecavalo.use:
+    description: Permite usar comandos básicos do HorseLoyalty
+    default: true
+  lealdadecavalo.admin:
+    description: Permissão administrativa (set, config)
     default: op
-  horselealdade.catalog:
+  lealdadecavalo.catalog:
+    description: Permite usar o catálogo de cavalos
     default: true
-  horselealdade.call:
+  lealdadecavalo.call:
+    description: Permite chamar cavalos
     default: true
-  horselealdade.favorite:
+  lealdadecavalo.favorite:
+    description: Permite favoritar e chamar o favorito
     default: true

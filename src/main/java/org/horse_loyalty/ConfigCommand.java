@@ -31,18 +31,27 @@ public class ConfigCommand {
             "riding-xp-per-block",
             "feeding.apple",
             "feeding.golden_apple",
-            "feeding.enchanted_golden_apple"
+            "feeding.enchanted_golden_apple",
+            "call-cooldown.base-seconds"
+    );
+
+    // Boolean keys that can be get/set with true/false
+    static final Set<String> BOOL_KEYS = Set.of(
+            "call-cooldown.enabled",
+            "call-range.enabled"
     );
 
     // List keys that support add/remove
     static final Set<String> LIST_KEYS = Set.of(
-            "level-xp-requirements"
+            "level-xp-requirements",
+            "call-range.range-per-level"
     );
 
     static final List<String> ALL_KEYS;
     static {
         ALL_KEYS = new ArrayList<>();
         ALL_KEYS.addAll(INT_KEYS);
+        ALL_KEYS.addAll(BOOL_KEYS);
         ALL_KEYS.addAll(LIST_KEYS);
         ALL_KEYS.sort(String::compareTo);
     }
@@ -57,7 +66,7 @@ public class ConfigCommand {
      * @param args   the arguments starting from the subcommand (e.g. ["get", "max-level"])
      */
     public static void handle(HorseLoyaltyPlugin plugin, Player player, String[] args) {
-        if (!player.hasPermission("horselealdade.admin")) {
+        if (!player.hasPermission("lealdadecavalo.admin")) {
             player.sendMessage("§cVocê não tem permissão para usar este comando.");
             return;
         }
@@ -75,21 +84,21 @@ public class ConfigCommand {
             case "get" -> handleGet(player, config, key);
             case "set" -> {
                 if (args.length < 3) {
-                    player.sendMessage("§cUso: /horselealdade config set <chave> <valor>");
+                    player.sendMessage("§cUso: /lealdadecavalo config set <chave> <valor>");
                     return;
                 }
                 handleSet(plugin, player, config, key, args[2]);
             }
             case "add" -> {
                 if (args.length < 3) {
-                    player.sendMessage("§cUso: /horselealdade config add <chave-lista> <valor>");
+                    player.sendMessage("§cUso: /lealdadecavalo config add <chave-lista> <valor>");
                     return;
                 }
                 handleAdd(plugin, player, config, key, args[2]);
             }
             case "remove" -> {
                 if (args.length < 3) {
-                    player.sendMessage("§cUso: /horselealdade config remove <chave-lista> <índice>");
+                    player.sendMessage("§cUso: /lealdadecavalo config remove <chave-lista> <índice>");
                     return;
                 }
                 handleRemove(plugin, player, config, key, args[2]);
@@ -99,7 +108,7 @@ public class ConfigCommand {
     }
 
     private static void handleGet(Player player, FileConfiguration config, String key) {
-        if (!INT_KEYS.contains(key) && !LIST_KEYS.contains(key)) {
+        if (!INT_KEYS.contains(key) && !BOOL_KEYS.contains(key) && !LIST_KEYS.contains(key)) {
             player.sendMessage("§cChave desconhecida: §e" + key);
             player.sendMessage("§7Chaves válidas: " + String.join(", ", ALL_KEYS));
             return;
@@ -108,6 +117,9 @@ public class ConfigCommand {
         if (LIST_KEYS.contains(key)) {
             List<Integer> list = config.getIntegerList(key);
             player.sendMessage("§6" + key + "§7: " + list);
+        } else if (BOOL_KEYS.contains(key)) {
+            boolean value = config.getBoolean(key);
+            player.sendMessage("§6" + key + "§7 = §e" + value);
         } else {
             int value = config.getInt(key, -1);
             player.sendMessage("§6" + key + "§7 = §e" + value);
@@ -116,9 +128,21 @@ public class ConfigCommand {
 
     private static void handleSet(HorseLoyaltyPlugin plugin, Player player, FileConfiguration config,
                                    String key, String rawValue) {
+        if (BOOL_KEYS.contains(key)) {
+            if (!rawValue.equalsIgnoreCase("true") && !rawValue.equalsIgnoreCase("false")) {
+                player.sendMessage("§cValor inválido. Use §etrue§c ou §efalse§c.");
+                return;
+            }
+            boolean value = Boolean.parseBoolean(rawValue);
+            config.set(key, value);
+            plugin.saveConfig();
+            player.sendMessage("§a" + key + " §7definido para §e" + value + "§7.");
+            return;
+        }
+
         if (!INT_KEYS.contains(key)) {
             if (LIST_KEYS.contains(key)) {
-                player.sendMessage("§cUse §e/horselealdade config add/remove§c para listas.");
+                player.sendMessage("§cUse §e/lealdadecavalo config add/remove§c para listas.");
             } else {
                 player.sendMessage("§cChave desconhecida: §e" + key);
                 player.sendMessage("§7Chaves válidas: " + String.join(", ", ALL_KEYS));
@@ -148,7 +172,7 @@ public class ConfigCommand {
                                    String key, String rawValue) {
         if (!LIST_KEYS.contains(key)) {
             if (INT_KEYS.contains(key)) {
-                player.sendMessage("§cUse §e/horselealdade config set§c para valores simples.");
+                player.sendMessage("§cUse §e/lealdadecavalo config set§c para valores simples.");
             } else {
                 player.sendMessage("§cChave desconhecida: §e" + key);
             }
@@ -205,12 +229,13 @@ public class ConfigCommand {
 
     private static void sendConfigHelp(Player player) {
         player.sendMessage("§6=== Configuração Dinâmica ===");
-        player.sendMessage("§a/horselealdade config get <chave> §7- Ver valor atual");
-        player.sendMessage("§a/horselealdade config set <chave> <valor> §7- Definir valor");
-        player.sendMessage("§a/horselealdade config add level-xp-requirements <xp> §7- Adicionar nível");
-        player.sendMessage("§a/horselealdade config remove level-xp-requirements <índice> §7- Remover nível");
+        player.sendMessage("§a/lealdadecavalo config get <chave> §7- Ver valor atual");
+        player.sendMessage("§a/lealdadecavalo config set <chave> <valor> §7- Definir valor (inteiro ou true/false)");
+        player.sendMessage("§a/lealdadecavalo config add <chave-lista> <valor> §7- Adicionar à lista");
+        player.sendMessage("§a/lealdadecavalo config remove <chave-lista> <índice> §7- Remover da lista");
         player.sendMessage("§7Chaves inteiras: " + String.join(", ", INT_KEYS.stream().sorted().toList()));
-        player.sendMessage("§7Chaves de lista: " + String.join(", ", LIST_KEYS));
+        player.sendMessage("§7Chaves booleanas: " + String.join(", ", BOOL_KEYS.stream().sorted().toList()));
+        player.sendMessage("§7Chaves de lista: " + String.join(", ", LIST_KEYS.stream().sorted().toList()));
     }
 
     /** Tab-completion suggestions for args starting after "config" */
@@ -222,7 +247,10 @@ public class ConfigCommand {
         if (args.length == 2) {
             String action = args[0].toLowerCase();
             if (action.equals("get") || action.equals("set")) {
-                return filterPrefix(new ArrayList<>(INT_KEYS), args[1]);
+                List<String> writable = new ArrayList<>();
+                writable.addAll(INT_KEYS);
+                writable.addAll(BOOL_KEYS);
+                return filterPrefix(writable, args[1]);
             }
             if (action.equals("add") || action.equals("remove")) {
                 return filterPrefix(new ArrayList<>(LIST_KEYS), args[1]);

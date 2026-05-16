@@ -14,16 +14,19 @@ public final class HorseLoyaltyPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        // Mescla chaves novas do config padrão no config existente do servidor
+        getConfig().options().copyDefaults(true);
+        saveConfig();
         this.loyaltyManager = new LoyaltyManager(this);
         this.catalogKey = new NamespacedKey(this, "horse_catalog");
         this.favoriteKey = new NamespacedKey(this, "favorite_horse");
 
         // Comandos
         HorseLealdadeCommand horseLealdadeCmd = new HorseLealdadeCommand(this, loyaltyManager);
-        Objects.requireNonNull(getCommand("horselealdade")).setExecutor(horseLealdadeCmd);
-        Objects.requireNonNull(getCommand("horselealdade")).setTabCompleter(horseLealdadeCmd);
+        Objects.requireNonNull(getCommand("lealdadecavalo")).setExecutor(horseLealdadeCmd);
+        Objects.requireNonNull(getCommand("lealdadecavalo")).setTabCompleter(horseLealdadeCmd);
         Objects.requireNonNull(getCommand("horsecatalog")).setExecutor(new HorseCatalogCommand(catalogKey));
-        Objects.requireNonNull(getCommand("callhorse")).setExecutor(new CallHorseCommand(loyaltyManager));
+        Objects.requireNonNull(getCommand("callhorse")).setExecutor(new CallHorseCommand(this, loyaltyManager));
         Objects.requireNonNull(getCommand("favoritehorse")).setExecutor(new FavoriteHorseCommand(loyaltyManager, favoriteKey));
         Objects.requireNonNull(getCommand("vemcapocoto")).setExecutor(new ComeHereHorseCommand(favoriteKey));
 

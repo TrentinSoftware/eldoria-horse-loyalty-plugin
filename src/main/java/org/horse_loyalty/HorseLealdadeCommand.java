@@ -35,8 +35,26 @@ public class HorseLealdadeCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
+            if (!player.hasPermission("lealdadecavalo.use")) {
+                player.sendMessage("§cVocê não tem permissão.");
+                return true;
+            }
             sendHelp(player);
             return true;
+        }
+
+        // Verificação de permissão por subcomando
+        String sub = args[0].toLowerCase();
+        if (sub.equals("set") || sub.equals("config")) {
+            if (!player.hasPermission("lealdadecavalo.admin")) {
+                player.sendMessage("§cVocê não tem permissão para usar este comando.");
+                return true;
+            }
+        } else {
+            if (!player.hasPermission("lealdadecavalo.use")) {
+                player.sendMessage("§cVocê não tem permissão.");
+                return true;
+            }
         }
 
         // Subcomandos que não exigem cavalo alvo
@@ -63,7 +81,7 @@ public class HorseLealdadeCommand implements CommandExecutor, TabCompleter {
                 return true;
             case "rename":
                 if (args.length < 2) {
-                    player.sendMessage("§cUso: /horselealdade rename <UUID>");
+                    player.sendMessage("§cUso: /lealdadecavalo rename <UUID>");
                     return true;
                 }
                 UUID horseUUID;
@@ -124,7 +142,7 @@ public class HorseLealdadeCommand implements CommandExecutor, TabCompleter {
 
         if (args[0].equalsIgnoreCase("set")) {
             if (args.length < 2) {
-                player.sendMessage("§cUso: /horselealdade set <0-10>");
+                player.sendMessage("§cUso: /lealdadecavalo set <0-10>");
                 return true;
             }
             try {
@@ -158,14 +176,20 @@ public class HorseLealdadeCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(Player player) {
-        player.sendMessage("§6=== Ajuda HorseLoyalty ===");
-        List<String> helpList = plugin.getConfig().getStringList("help-messages");
-        if (helpList.isEmpty()) {
+        player.sendMessage("§6=== HorseLoyalty ===");
+        List<String> playerHelp = plugin.getConfig().getStringList("help-player");
+        if (playerHelp.isEmpty()) {
             player.sendMessage("§cNenhuma mensagem de ajuda configurada. Verifique o config.yml.");
-            return;
+        } else {
+            for (String line : playerHelp) {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
+            }
         }
-        for (String line : helpList) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
+        if (player.hasPermission("lealdadecavalo.admin")) {
+            List<String> adminHelp = plugin.getConfig().getStringList("help-admin");
+            for (String line : adminHelp) {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
+            }
         }
     }
 
