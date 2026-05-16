@@ -1,4 +1,4 @@
-# 🐴 HorseLoyalty — Guia Completo para a Staff
+# 🐴 HorseLoyalty — Guia Completo:
 
 Plugin de lealdade para cavalos. Quanto mais o jogador cuida e usa o cavalo, maior o nível de lealdade dele — e mais habilidades o cavalo desbloqueia.
 
